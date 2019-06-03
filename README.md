@@ -3,7 +3,7 @@ Experiemntální role pro deploy RoboZonky přes Ansible. Zatím šité horkou j
 ## Předpoklady
 
 * systemd
-* Nainstalovaná Java pro RoboZonky. Používá se natvrdo ta v $PATH.
+* Nainstalovaná Java pro RoboZonky. Buď může být v $PATH, nebo je potřeba nastavit robozonky_java_home v vars/main.yml.
 
 ## Konfigurační soubory
 
@@ -20,5 +20,4 @@ Následující soubory je potřeba přidat:
 
 ## Co by to chtělo vylepšit
 
-* Podpora volby jiné verze Javy než v $PATH – asi konfigurací JAVA_HOME. Bude asi potřeba na to udělat nějaký wrapper script nebo úprava samotného RoboZonky.
 * Nějaké lepší rozdělení přinejmenším variables, aby to bylo dobře znovupoužitelné a šlo to aktualizovat.

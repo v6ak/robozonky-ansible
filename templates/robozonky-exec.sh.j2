@@ -1,0 +1,12 @@
+#!/bin/bash
+# safety settings
+set -u
+set -e
+set -o pipefail
+
+export JAVA_OPTS="-Drobozonky.properties.file={{robozonky_path}}/robozonky.properties -Dlog4j.configurationFile={{robozonky_path}}/log4j2.xml"
+{% if robozonky_java_home is defined %}
+export JAVA_HOME="{{robozonky_java_home}}"
+export PATH="$JAVA_HOME/bin:$PATH"
+{% endif %}
+exec {{robozonky_path}}/robozonky.sh @{{robozonky_path}}/robozonky.cli

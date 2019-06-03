@@ -37,6 +37,10 @@
     - log4j2.xml
   become_user: "{{robozonky_user}}"
   notify: restart RoboZonky
+- name: RoboZonky » wrapper
+  template: src=robozonky-exec.sh.j2 dest={{robozonky_path}}/robozonky-exec.sh mode=700
+  become_user: "{{robozonky_user}}"
+  notify: restart RoboZonky
 - name: RoboZonky » other config files through templates
   template: src={{item}}.j2 dest={{robozonky_path}}/{{item}}
   loop:
