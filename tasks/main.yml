@@ -1,0 +1,58 @@
+---
+- name: RoboZonky » user
+  user: name={{robozonky_user}} uid={{robozonky_uid}}
+- name: RoboZonky » installation dir for {{robozonky_version}}
+  file: path={{robozonky_path}} state=directory mode=700
+  become_user: "{{robozonky_user}}"
+- name: Install RoboZonky {{robozonky_version}}
+  unarchive:
+    remote_src=yes
+    src=https://repo1.maven.org/maven2/com/github/robozonky/distribution/robozonky-distribution-full/{{robozonky_version}}/robozonky-distribution-full-{{robozonky_version}}.zip
+    dest={{robozonky_path}}
+    creates={{robozonky_path}}/Google
+  become_user: "{{robozonky_user}}"
+
+- name: RoboZonky » Stonky » Check for Stonky config
+  local_action: stat path={{role_path}}/files/Google/StoredCredential
+  register: stat_stonky_config
+- name: RoboZonky » Stonky » create Google dir for Stonky
+  file: path={{robozonky_path}}/Google state=directory
+  become_user: "{{robozonky_user}}"
+  when: stat_stonky_config.stat.exists == true
+- name: RoboZonky » Stonky » Google account credentials
+  copy: src=Google/StoredCredential dest={{robozonky_path}}/Google/StoredCredential mode=600
+  notify: restart RoboZonky
+  when: stat_stonky_config.stat.exists == true
+- name: RoboZonky » Stonky » disable Stonky
+  file: path={{robozonky_path}}/Google state=absent
+  notify: restart RoboZonky
+  when: stat_stonky_config.stat.exists == false
+
+- name: RoboZonky » other config files
+  copy: src={{item}} dest={{robozonky_path}}/{{item}} mode=600
+  loop:
+    - robozonky.keystore
+    - robozonky-notifications.cfg
+    - robozonky-strategy.cfg
+    - log4j2.xml
+  become_user: "{{robozonky_user}}"
+  notify: restart RoboZonky
+- name: RoboZonky » other config files through templates
+  template: src={{item}}.j2 dest={{robozonky_path}}/{{item}}
+  loop:
+    - robozonky.cli
+    - robozonky.properties
+  become_user: "{{robozonky_user}}"
+  notify: restart RoboZonky
+- name: RoboZonky » set current RoboZonky version
+  file:
+    src={{robozonky_path}}
+    path={{robozonky_current_path}}
+    state=link
+  become_user: "{{robozonky_user}}"
+  notify: restart RoboZonky
+- name: RoboZonky » service
+  template:
+    src=robozonky.service.j2
+    dest=/etc/systemd/system/robozonky.service
+  notify: restart RoboZonky

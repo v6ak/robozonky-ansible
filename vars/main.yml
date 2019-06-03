@@ -1,0 +1,8 @@
+---
+robozonky_instance_name: ansiblozonky
+robozonky_user: robozonky # use any username you want; The user will be created if it does not exist.
+#robozonky_uid: 12345 # you can pick a specific UID and uncomment this line
+robozonky_storage_password: someeeee-pass-word-forr-keystoreeeee # look at the parameter after -p in robozonky.cli
+robozonky_version: 5.2.0
+robozonky_path: /home/{{robozonky_user}}/RoboZonky-{{robozonky_version}}
+robozonky_current_path: /home/{{robozonky_user}}/RoboZonky

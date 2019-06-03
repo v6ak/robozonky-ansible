@@ -1,0 +1,14 @@
+[Unit]
+Description=RoboZonky: Automated Zonky.cz investing robot for {{robozonky_user}}
+After=network.target
+
+[Service]
+User={{robozonky_user}}
+Group={{robozonky_user}}
+Restart=always
+WorkingDirectory={{robozonky_path}}
+ExecStart=/usr/bin/env "JAVA_OPTS=-Drobozonky.properties.file={{robozonky_path}}/robozonky.properties -Dlog4j.configurationFile={{robozonky_path}}/log4j2.xml" {{robozonky_path}}/robozonky.sh @{{robozonky_path}}/robozonky.cli
+ExecStop=
+
+[Install]
+WantedBy=multi-user.target
