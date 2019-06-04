@@ -1,23 +1,82 @@
-Experiemntální role pro deploy RoboZonky přes Ansible. Zatím šité horkou jehlou.
+Experiemntální role pro deploy RoboZonky přes Ansible. Šité už trochu méně horkou jehlou.
 
 ## Předpoklady
 
 * systemd
 * Nainstalovaná Java pro RoboZonky. Buď může být v $PATH, nebo je potřeba nastavit robozonky_java_home v vars/main.yml.
 
+## Co nastavit?
+
+Budete potřebovat nastavit pár proměnných
+
+```
+robozonky_user_create: yes # If you have created the user somewhere else, just say “no”
+robozonky_user_name: robozonky # use any system username you want; The user will be created if it does not exist.
+#robozonky_user_uid: 12345 # you can pick a specific UID and uncomment this line
+robozonky_storage_password: someeeee-pass-word-forr-keystoreeeee # look at the parameter after -p in robozonky.cli
+#robozonky_java_home: /usr/lib/jvm/java-11-openjdk/ # You can put path (without trailing “bin/java” of JRE) if the default JRE is not suitable. Remove leading “#” to make it effective.
+# robozonky_instance_name: ansiblozonky # you might want a different name and uncomment this line
+robozonky_files_path: "{{playbook_dir}}/files/robozonky" # directory where Ansible should look for config files
+```
+
+Vedle toho můžete nastavit i pár dalších proměnných:
+
+
 ## Konfigurační soubory
 
-Následující soubory je potřeba přidat:
+Následující soubory je potřeba přidat do adresáře v robozonky_files_path:
 
-* files/robozonky-notifications.cfg
-* files/robozonky-strategy.cfg
-* files/robozonky.keystore
-* volitelně files/Google/StoredCredential (pro integraci se Stonky)
+* robozonky-notifications.cfg
+* robozonky-strategy.cfg
+* robozonky.keystore
+* volitelně Google/StoredCredential (pro integraci se Stonky)
 
-## Co upravit?
+## Jak aktualizovat RoboZonky
 
-* vars/main.yml (vizte komentáře v souboru)
+Pokud do role nebudete nijak zasahovat, mělo by stačit aktualizovat tuto roli. Nebo – máte-li odvahu – můžete nastavit proměnnou robozonky_version na verzi RoboZonky, pokud se v RoboZonky nic nezměnilo, mělo by to také fungovat.
 
-## Co by to chtělo vylepšit
+## Jak může vypadat Playbook
 
-* Nějaké lepší rozdělení přinejmenším variables, aby to bylo dobře znovupoužitelné a šlo to aktualizovat.
+Pokud znáte Ansible, asi můžete toto přeskočit. Jinak se může hodit tato sekce. Zkusíme si vytvořit uživatele „robozonky“ a nasadit to u něj následujícím příkazem:
+
+    ansible-playbook my-server.yml -i hosts
+
+### my-server.yml
+
+```
+---
+- hosts: my-server
+  roles:
+    #- {role: 'basic-setup', tags: 'basic-setup'}
+    - {role: 'robozonky', tags: 'robozonky'}
+  user: my_administration_user_name
+  become: yes
+  vars:
+    robozonky_user_create: yes
+    robozonky_user_name: robozonky # use any username you want; The user will be created if it does not exist.
+    robozonky_storage_password: someeeee-pass-word-forr-keystoreeeee # look at the parameter after -p in robozonky.cli
+    robozonky_files_path: "{{playbook_dir}}/files/robozonky"
+```
+
+### hosts
+
+```
+[my-group]
+12.34.56.78
+```
+
+### roles/robozonky
+
+Sem naklonujte tento repozitář. Jde to udělat třeba tímto příkazem:
+
+    mkdir -p roles && git clone https://github.com/v6ak/robozonky-ansible roles/robozonky
+
+
+### files/robozonky
+
+Sem přijdou soubory robozonky.keystore (vytvořené instalátorem), robozonky-notifications.cfg a robozonky-strategy.cfg.
+
+### files/robozonky/Google
+
+Sem může přijít soubor StoredCredential, který slouží k integraci se Stonky. Chybí-li, integrace se Stonky se nepoužije.
+

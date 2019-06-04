@@ -1,10 +1,10 @@
 [Unit]
-Description=RoboZonky {{robozonky_version}}: Automated Zonky.cz investing robot for {{robozonky_user}}
+Description=RoboZonky {{robozonky_version}}: Automated Zonky.cz investing robot for {{robozonky_user_name}}
 After=network.target
 
 [Service]
-User={{robozonky_user}}
-Group={{robozonky_user}}
+User={{robozonky_user_name}}
+Group={{robozonky_user_name}}
 Restart=always
 WorkingDirectory={{robozonky_path}}
 ExecStart={{robozonky_path}}/robozonky-exec.sh
