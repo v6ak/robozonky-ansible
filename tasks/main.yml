@@ -9,7 +9,10 @@
     remote_src=yes
     src=https://repo1.maven.org/maven2/com/github/robozonky/distribution/robozonky-distribution-full/{{robozonky_version}}/robozonky-distribution-full-{{robozonky_version}}.zip
     dest={{robozonky_path}}
-    creates={{robozonky_path}}/Google
+    creates={{robozonky_path}}/done
+  become_user: "{{robozonky_user}}"
+- name: RoboZonky » Stonky » create done marker
+  file: path={{robozonky_path}}/done state=directory
   become_user: "{{robozonky_user}}"
 
 - name: RoboZonky » Stonky » Check for Stonky config
