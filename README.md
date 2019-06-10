@@ -35,6 +35,8 @@ Následující soubory je potřeba přidat do adresáře v robozonky_files_path:
 
 Pokud do role nebudete nijak zasahovat, mělo by stačit aktualizovat tuto roli. Nebo – máte-li odvahu – můžete nastavit proměnnou robozonky_version na verzi RoboZonky, pokud se v RoboZonky nic nezměnilo, mělo by to také fungovat.
 
+Stará verze zůstává nainstalovaná se starými konfiguráky atd. Můžete ji smazat ručně.
+
 ## Jak může vypadat Playbook
 
 Pokud znáte Ansible, asi můžete toto přeskočit. Jinak se může hodit tato sekce. Zkusíme si vytvořit uživatele „robozonky“ a nasadit to u něj následujícím příkazem:
