@@ -33,7 +33,7 @@ Následující soubory je potřeba přidat do adresáře v robozonky_files_path:
 
 ## Jak aktualizovat RoboZonky
 
-Pokud do role nebudete nijak zasahovat, mělo by stačit aktualizovat tuto roli. Nebo – máte-li odvahu – můžete nastavit proměnnou robozonky_version na verzi RoboZonky, pokud se v RoboZonky nic nezměnilo, mělo by to také fungovat.
+Pokud do role nebudete nijak zasahovat, mělo by stačit aktualizovat tuto roli. Nebo – máte-li odvahu – můžete nastavit proměnnou robozonky_version na verzi RoboZonky, pokud se v RoboZonky nic nezměnilo, mělo by to také fungovat. V případě opravných verzí by toto mělo fungovat bez problémů, v případě větších změn to fungovat nemusí.
 
 Stará verze zůstává nainstalovaná se starými konfiguráky atd. Můžete ji smazat ručně.
 
