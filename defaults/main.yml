@@ -1,5 +1,5 @@
 ---
 robozonky_instance_name: ansiblozonky
-robozonky_version: 5.2.5
+robozonky_version: 5.2.7
 robozonky_path: /home/{{robozonky_user_name}}/RoboZonky-{{robozonky_version}}
 robozonky_current_path: /home/{{robozonky_user_name}}/RoboZonky
