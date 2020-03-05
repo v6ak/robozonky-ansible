@@ -1,4 +1,5 @@
 ---
+# Basic installation
 - name: RoboZonky » user {{robozonky_user_name}} id {{robozonky_user_uid | default("automatic")}}
   user: name={{robozonky_user_name}} uid={{robozonky_user_uid | default(omit)}}
   when: robozonky_user_create == true
@@ -29,13 +30,6 @@
   copy: src=log4j2.xml dest={{robozonky_path}}/log4j2.xml mode=600
   become_user: "{{robozonky_user_name}}"
   notify: restart RoboZonky
-- name: RoboZonky » other config files
-  copy: src={{robozonky_files_path}}/{{item}} dest={{robozonky_path}}/{{item}} mode=600
-  loop:
-    - robozonky-notifications.cfg
-    - robozonky-strategy.cfg
-  become_user: "{{robozonky_user_name}}"
-  notify: restart RoboZonky
 - name: RoboZonky » wrapper
   template: src=robozonky-exec.sh.j2 dest={{robozonky_path}}/robozonky-exec.sh mode=700
   become_user: "{{robozonky_user_name}}"
@@ -47,6 +41,33 @@
     - robozonky.properties
   become_user: "{{robozonky_user_name}}"
   notify: restart RoboZonky
+
+# Config
+- name: robozonky-strategy.cfg » upload candidate
+  copy: src={{robozonky_files_path}}/robozonky-strategy.cfg dest={{robozonky_path}}/robozonky-strategy-candidate.cfg mode=600
+  become_user: "{{robozonky_user_name}}"
+- name: robozonky-strategy.cfg » compare candidate and current strategy file
+  command: diff {{robozonky_path}}/robozonky-strategy-candidate.cfg {{robozonky_path}}/robozonky-strategy.cfg
+  failed_when: "robozonky_strategy_diff.rc > 1" # Do not fail just on different files
+  register: robozonky_strategy_diff
+  become_user: "{{robozonky_user_name}}"
+- name: robozonky-strategy.cfg » validate candidate
+  shell: 'echo | "{{robozonky_path}}/robozonky-cli" strategy-validator -l file://{{robozonky_path}}/robozonky-strategy-candidate.cfg'
+  become_user: "{{robozonky_user_name}}"
+  when: robozonky_strategy_diff.rc != 0
+- name: robozonky-strategy.cfg » commit candidate
+  shell: "cp {{robozonky_path}}/robozonky-strategy-candidate.cfg {{robozonky_path}}/robozonky-strategy.cfg.wip && sync && mv {{robozonky_path}}/robozonky-strategy.cfg.wip {{robozonky_path}}/robozonky-strategy.cfg"
+  become_user: "{{robozonky_user_name}}"
+  when: robozonky_strategy_diff.rc != 0
+  notify: restart RoboZonky
+- name: RoboZonky » other config files
+  copy: src={{robozonky_files_path}}/{{item}} dest={{robozonky_path}}/{{item}} mode=600
+  loop:
+    - robozonky-notifications.cfg
+  become_user: "{{robozonky_user_name}}"
+  notify: restart RoboZonky
+
+# Finalize
 - name: RoboZonky » set current RoboZonky version
   file:
     src={{robozonky_path}}
