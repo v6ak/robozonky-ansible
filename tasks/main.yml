@@ -5,6 +5,9 @@
 - name: RoboZonky » installation dir for {{robozonky_version}}
   file: path={{robozonky_path}} state=directory mode=700
   become_user: "{{robozonky_user_name}}"
+- name: RoboZonky » data dir
+  file: path={{robozonky_data_path}} state=directory mode=700
+  become_user: "{{robozonky_user_name}}"
 - name: Install RoboZonky {{robozonky_version}}
   unarchive:
     remote_src=yes
@@ -12,26 +15,16 @@
     dest={{robozonky_path}}
     creates={{robozonky_path}}/done
   become_user: "{{robozonky_user_name}}"
-- name: RoboZonky » Stonky » create done marker
+- name: Download RoboZonky CLI {{robozonky_version}}
+  get_url:
+    url=https://github.com/RoboZonky/robozonky/releases/download/robozonky-{{robozonky_version}}/robozonky-distribution-cli-{{robozonky_version}}-full.jar
+    dest={{robozonky_path}}/robozonky-cli.jar
+- name: RoboZonky » create done marker
   file: path={{robozonky_path}}/done state=directory
   become_user: "{{robozonky_user_name}}"
-
-- name: RoboZonky » Stonky » Check for Stonky config
-  local_action: stat path={{robozonky_files_path}}/Google/StoredCredential
-  register: stat_stonky_config
-- name: RoboZonky » Stonky » create Google dir for Stonky
-  file: path={{robozonky_path}}/Google state=directory
+- name: RoboZonky CLI wrapper
+  template: src=robozonky-cli.sh.j2 dest={{robozonky_path}}/robozonky-cli mode=700
   become_user: "{{robozonky_user_name}}"
-  when: stat_stonky_config.stat.exists == true
-- name: RoboZonky » Stonky » Google account credentials
-  copy: src={{robozonky_files_path}}/Google/StoredCredential dest={{robozonky_path}}/Google/StoredCredential mode=600
-  notify: restart RoboZonky
-  when: stat_stonky_config.stat.exists == true
-- name: RoboZonky » Stonky » disable Stonky
-  file: path={{robozonky_path}}/Google state=absent
-  notify: restart RoboZonky
-  when: stat_stonky_config.stat.exists == false
-
 - name: RoboZonky » log4j2.xml
   copy: src=log4j2.xml dest={{robozonky_path}}/log4j2.xml mode=600
   become_user: "{{robozonky_user_name}}"
@@ -39,7 +32,6 @@
 - name: RoboZonky » other config files
   copy: src={{robozonky_files_path}}/{{item}} dest={{robozonky_path}}/{{item}} mode=600
   loop:
-    - robozonky.keystore
     - robozonky-notifications.cfg
     - robozonky-strategy.cfg
   become_user: "{{robozonky_user_name}}"
@@ -67,3 +59,25 @@
     src=robozonky.service.j2
     dest=/etc/systemd/system/robozonky.service
   notify: restart RoboZonky
+
+# Login
+- name: Check for authentication code
+  fail:
+    msg: "Please provide robozonky_zonky_auth_code. You can get the code at https://app.zonky.cz/api/oauth/authorize?client_id=robozonky&redirect_uri=https://app.zonky.cz/api/oauth/code&response_type=code&scope=SCOPE_APP_BASIC_INFO%20SCOPE_INVESTMENT_READ%20SCOPE_INVESTMENT_WRITE%20SCOPE_RESERVATIONS_READ%20SCOPE_RESERVATIONS_WRITE%20SCOPE_RESERVATIONS_SETTINGS_WRITE%20SCOPE_RESERVATIONS_SETTINGS_READ%20SCOPE_NOTIFICATIONS_READ%20SCOPE_NOTIFICATIONS_WRITE&state=dffdgdfg"
+  when: '(robozonky_zonky_auth_code is not defined) or ((robozonky_zonky_auth_code|trim) == "")'
+  become_user: "{{robozonky_user_name}}"
+- name: Log in config file
+  template: src=robozonky-login.cli.j2 dest={{robozonky_data_path}}/robozonky-login.cli mode=600
+  become_user: "{{robozonky_user_name}}"
+  notify: Log in
+- name: Check for unsuccessful login attempt
+  stat:
+    path='{{robozonky_data_path}}/must-log-in'
+  register: must_log_in_stat_result
+  become_user: "{{robozonky_user_name}}"
+- name: Force login if there is an unsuccessful login attempt
+  file: # actually noop, but we have to do something
+    path='{{robozonky_data_path}}/must-log-in'
+    state=touch
+  when: must_log_in_stat_result.stat.exists == True
+  notify: Log in

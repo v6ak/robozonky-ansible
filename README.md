@@ -17,6 +17,7 @@ robozonky_storage_password: someeeee-pass-word-forr-keystoreeeee # look at the p
 #robozonky_java_home: /usr/lib/jvm/java-11-openjdk/ # You can put path (without trailing “bin/java” of JRE) if the default JRE is not suitable. Remove leading “#” to make it effective.
 # robozonky_instance_name: ansiblozonky # you might want a different name and uncomment this line
 robozonky_files_path: "{{playbook_dir}}/files/robozonky" # directory where Ansible should look for config files
+# robozonky_data_path: # Directory to store data (e.g., authentication tokens) in.
 ```
 
 Vedle toho můžete nastavit i pár dalších proměnných:
@@ -28,8 +29,6 @@ Následující soubory je potřeba přidat do adresáře v robozonky_files_path:
 
 * robozonky-notifications.cfg
 * robozonky-strategy.cfg
-* robozonky.keystore
-* volitelně Google/StoredCredential (pro integraci se Stonky)
 
 ## Jak aktualizovat RoboZonky
 
@@ -73,12 +72,8 @@ Sem naklonujte tento repozitář. Jde to udělat třeba tímto příkazem:
 
     mkdir -p roles && git clone https://github.com/v6ak/robozonky-ansible roles/robozonky
 
-
 ### files/robozonky
 
-Sem přijdou soubory robozonky.keystore (vytvořené instalátorem), robozonky-notifications.cfg a robozonky-strategy.cfg.
+Sem přijdou soubory robozonky-notifications.cfg a robozonky-strategy.cfg.
 
-### files/robozonky/Google
-
-Sem může přijít soubor StoredCredential, který slouží k integraci se Stonky. Chybí-li, integrace se Stonky se nepoužije.
 
