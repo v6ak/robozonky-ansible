@@ -13,11 +13,16 @@ Budete potřebovat nastavit pár proměnných
 robozonky_user_create: yes # If you have created the user somewhere else, just say “no”
 robozonky_user_name: robozonky # use any system username you want; The user will be created if it does not exist.
 #robozonky_user_uid: 12345 # you can pick a specific UID and uncomment this line
+
+robozonky_zonky_email: your-email@for.zonky.cz
+robozonky_zonky_auth_code: abC123 # Authentication code from https://app.zonky.cz/api/oauth/authorize?client_id=robozonky&redirect_uri=https://app.zonky.cz/api/oauth/code&response_type=code&scope=SCOPE_APP_BASIC_INFO%20SCOPE_INVESTMENT_READ%20SCOPE_INVESTMENT_WRITE%20SCOPE_RESERVATIONS_READ%20SCOPE_RESERVATIONS_WRITE%20SCOPE_RESERVATIONS_SETTINGS_WRITE%20SCOPE_RESERVATIONS_SETTINGS_READ%20SCOPE_NOTIFICATIONS_READ%20SCOPE_NOTIFICATIONS_WRITE&state=dffdgdfg
+
 robozonky_storage_password: someeeee-pass-word-forr-keystoreeeee # look at the parameter after -p in robozonky.cli
-#robozonky_java_home: /usr/lib/jvm/java-11-openjdk/ # You can put path (without trailing “bin/java” of JRE) if the default JRE is not suitable. Remove leading “#” to make it effective.
+# robozonky_java_home: /usr/lib/jvm/java-11-openjdk/ # You can put path (without trailing “bin/java” of JRE) if the default JRE is not suitable. Remove leading “#” to make it effective.
 # robozonky_instance_name: ansiblozonky # you might want a different name and uncomment this line
 robozonky_files_path: "{{playbook_dir}}/files/robozonky" # directory where Ansible should look for config files
 # robozonky_data_path: # Directory to store data (e.g., authentication tokens) in.
+
 ```
 
 Vedle toho můžete nastavit i pár dalších proměnných:
