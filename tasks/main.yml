@@ -1,4 +1,25 @@
 ---
+# Initial check
+
+## First, check just all those that we absolutely must have
+- name: Variables » Check those that are required
+  fail: "Variable {{item}} is not set."
+  when: item not in vars
+  loop:
+    - robozonky_user_create
+    - robozonky_user_name
+    - robozonky_user_uid
+## Also, warn on those that are needed for login, but continue anyway
+- name: Variables » Check those that are required for login
+  fail: "Variable {{item}} is not set. We are going to fail later, but we can continue until"
+  when: item not in vars
+  ignore_errors: yes
+  register: login_check_result
+  loop:
+    - robozonky_zonky_email
+    - robozonky_zonky_auth_code
+    - robozonky_storage_password
+
 # Basic installation
 - name: RoboZonky » user {{robozonky_user_name}} id {{robozonky_user_uid | default("automatic")}}
   user: name={{robozonky_user_name}} uid={{robozonky_user_uid | default(omit)}}
@@ -83,6 +104,10 @@
   notify: restart RoboZonky
 
 # Login
+- name: Check log-in variables
+  fail:
+    msg: 'Log-in cannot be done: Missing variables: {{login_check_result.results | selectattr("failed", "defined") | selectattr("failed", "equalto", True) | map(attribute="item") | join(", ")}}'
+  when: login_check_result.failed is defined and login_check_result.failed
 - name: Check for authentication code
   fail:
     msg: "Please provide robozonky_zonky_auth_code. You can get the code at https://app.zonky.cz/api/oauth/authorize?client_id=robozonky&redirect_uri=https://app.zonky.cz/api/oauth/code&response_type=code&scope=SCOPE_APP_BASIC_INFO%20SCOPE_INVESTMENT_READ%20SCOPE_INVESTMENT_WRITE%20SCOPE_RESERVATIONS_READ%20SCOPE_RESERVATIONS_WRITE%20SCOPE_RESERVATIONS_SETTINGS_WRITE%20SCOPE_RESERVATIONS_SETTINGS_READ%20SCOPE_NOTIFICATIONS_READ%20SCOPE_NOTIFICATIONS_WRITE&state=dffdgdfg"
