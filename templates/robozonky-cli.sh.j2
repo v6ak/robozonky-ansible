@@ -8,4 +8,4 @@ set -o pipefail
 export JAVA_HOME="{{robozonky_java_home}}"
 export PATH="$JAVA_HOME/bin:$PATH"
 {% endif %}
-exec java -jar {{robozonky_path}}/robozonky-cli.jar "$@"
+exec java -jar {{robozonky_path}}/robozonky-cli*.jar "$@"
