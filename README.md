@@ -12,7 +12,7 @@ Budete potřebovat nastavit pár proměnných
 ```
 robozonky_user_create: yes # If you have created the user somewhere else, just say “no”
 robozonky_user_name: robozonky # use any system username you want; The user will be created if it does not exist.
-#robozonky_user_uid: 12345 # you can pick a specific UID and uncomment this line
+# robozonky_user_uid: 12345 # you can pick a specific UID and uncomment this line if you don't want the system to pick UID
 
 robozonky_zonky_email: your-email@for.zonky.cz
 robozonky_zonky_auth_code: abC123 # Authentication code from https://app.zonky.cz/api/oauth/authorize?client_id=robozonky&redirect_uri=https://app.zonky.cz/api/oauth/code&response_type=code&scope=SCOPE_APP_BASIC_INFO%20SCOPE_INVESTMENT_READ%20SCOPE_INVESTMENT_WRITE%20SCOPE_RESERVATIONS_READ%20SCOPE_RESERVATIONS_WRITE%20SCOPE_RESERVATIONS_SETTINGS_WRITE%20SCOPE_RESERVATIONS_SETTINGS_READ%20SCOPE_NOTIFICATIONS_READ%20SCOPE_NOTIFICATIONS_WRITE&state=dffdgdfg
@@ -32,14 +32,16 @@ Vedle toho můžete nastavit i pár dalších proměnných:
 
 Následující soubory je potřeba přidat do adresáře v robozonky_files_path:
 
-* robozonky-notifications.cfg
-* robozonky-strategy.cfg
+* robozonky-notifications.cfg # https://github.com/RoboZonky/robozonky/wiki/E-mailov%C3%A9-notifikace
+* robozonky-strategy.cfg # https://robozonky.github.io/konfigurace-strategie/
 
 ## Jak aktualizovat RoboZonky
 
 Pokud do role nebudete nijak zasahovat, mělo by stačit aktualizovat tuto roli. Nebo – máte-li odvahu – můžete nastavit proměnnou robozonky_version na verzi RoboZonky, pokud se v RoboZonky nic nezměnilo, mělo by to také fungovat. V případě opravných verzí by toto mělo fungovat bez problémů, v případě větších změn to fungovat nemusí.
 
 Stará verze zůstává nainstalovaná se starými konfiguráky atd. Můžete ji smazat ručně.
+
+Při updatu se zkontroluje, zda je strategie funkční s novou verzí. Pokud strategie neprojde testem, update se nedokončí a zůstane v provozu stará verze.
 
 ## Jak může vypadat Playbook
 
@@ -53,8 +55,9 @@ Pokud znáte Ansible, asi můžete toto přeskočit. Jinak se může hodit tato 
 ---
 - hosts: my-server
   roles:
-    #- {role: 'basic-setup', tags: 'basic-setup'}
+    # - {role: 'basic-setup', tags: 'basic-setup'}
     - {role: 'robozonky', tags: 'robozonky'}
+    # - {role: 'some-other-role', tags: 'some-other-tag'}
   user: my_administration_user_name
   become: yes
   vars:

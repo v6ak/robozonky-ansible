@@ -6,9 +6,19 @@
   fail: "Variable {{item}} is not set."
   when: item not in vars
   loop:
+    # We check even parameters with a default value, because we don't want to rely on the default value there.
+    # We write there:
+    # * all required parameters (obviously)
+    # * all optional parameters with a default value (in order to make it simpler)
+    # * all optional parameters without a default value commented.
+    # We exclude:
+    # * all parameters that are neede just for login (those are checked later)
     - robozonky_user_create
     - robozonky_user_name
     - robozonky_user_uid
+    #- robozonky_java_home
+    - robozonky_instance_name
+    - robozonky_data_path
 ## Also, warn on those that are needed for login, but continue anyway
 - name: Variables » Check those that are required for login
   fail: "Variable {{item}} is not set. We are going to fail later, but we can continue until"
@@ -20,11 +30,16 @@
     - robozonky_zonky_auth_code
     - robozonky_storage_password
 
-# Basic installation
-- name: RoboZonky » user {{robozonky_user_name}} id {{robozonky_user_uid | default("automatic")}}
+# Shared parts
+- name: user {{robozonky_user_name}} id {{robozonky_user_uid | default("automatic")}}
   user: name={{robozonky_user_name}} uid={{robozonky_user_uid | default(omit)}}
   when: robozonky_user_create == true
-- name: RoboZonky » installation dir for {{robozonky_version}}
+- name: data dir
+  file: path={{robozonky_data_path}} state=directory mode=700
+  become_user: "{{robozonky_user_name}}"
+
+# Basic installation – version specific
+- name: installation dir for {{robozonky_version}}
   file: path={{robozonky_path}} state=directory mode=700
   become_user: "{{robozonky_user_name}}"
 - name: RoboZonky » data dir
@@ -47,34 +62,37 @@
 - name: RoboZonky CLI wrapper
   template: src=robozonky-cli.sh.j2 dest={{robozonky_path}}/robozonky-cli mode=700
   become_user: "{{robozonky_user_name}}"
-- name: RoboZonky » log4j2.xml
-  copy: src=log4j2.xml dest={{robozonky_path}}/log4j2.xml mode=600
-  become_user: "{{robozonky_user_name}}"
-  notify: restart RoboZonky
 - name: RoboZonky » wrapper
   template: src=robozonky-exec.sh.j2 dest={{robozonky_path}}/robozonky-exec.sh mode=700
   become_user: "{{robozonky_user_name}}"
   notify: restart RoboZonky
-- name: RoboZonky » other config files through templates
+
+# Config
+- name: log config – log4j2.xml
+  copy: src=log4j2.xml dest={{robozonky_path}}/log4j2.xml mode=600
+  become_user: "{{robozonky_user_name}}"
+  notify: restart RoboZonky
+- name: other config files through templates
   template: src={{item}}.j2 dest={{robozonky_path}}/{{item}}
   loop:
     - robozonky.cli
     - robozonky.properties
   become_user: "{{robozonky_user_name}}"
   notify: restart RoboZonky
-
-# Config
 - name: robozonky-strategy.cfg » upload candidate
   copy: src={{robozonky_files_path}}/robozonky-strategy.cfg dest={{robozonky_path}}/robozonky-strategy-candidate.cfg mode=600
   become_user: "{{robozonky_user_name}}"
+
 - name: robozonky-strategy.cfg » compare candidate and current strategy file
-  command: diff {{robozonky_path}}/robozonky-strategy-candidate.cfg {{robozonky_path}}/robozonky-strategy.cfg
+  shell: "if [ -e {{robozonky_path}}/robozonky-strategy.cfg ]; then diff {{robozonky_path}}/robozonky-strategy-candidate.cfg {{robozonky_path}}/robozonky-strategy.cfg; else exit 1; fi"
   failed_when: "robozonky_strategy_diff.rc > 1" # Do not fail just on different files
   register: robozonky_strategy_diff
   changed_when: False
   become_user: "{{robozonky_user_name}}"
 - name: robozonky-strategy.cfg » validate candidate
-  shell: 'echo | "{{robozonky_path}}/robozonky-cli" strategy-validator -l file://{{robozonky_path}}/robozonky-strategy-candidate.cfg'
+  shell: 'echo | "./robozonky-cli" strategy-validator -l file://{{robozonky_path}}/robozonky-strategy-candidate.cfg'
+  args:
+    chdir: "{{robozonky_path}}"
   become_user: "{{robozonky_user_name}}"
   when: robozonky_strategy_diff.rc != 0
 - name: robozonky-strategy.cfg » commit candidate
