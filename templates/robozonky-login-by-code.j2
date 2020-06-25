@@ -4,7 +4,9 @@ set -u
 set -e
 set -o pipefail
 
-rm {{robozonky_data_path}}/login.cli
+if [ -e "{{robozonky_data_path}}/login.cli" ]; then
+	rm {{robozonky_data_path}}/login.cli
+fi
 umask 0077 # ensure secure file permissions
 cat > {{robozonky_data_path}}/login.cli <<EOF
 zonky-credentials
