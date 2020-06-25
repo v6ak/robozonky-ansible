@@ -15,7 +15,7 @@
     # * all parameters that are neede just for login (those are checked later)
     - robozonky_user_create
     - robozonky_user_name
-    - robozonky_user_uid
+    #- robozonky_user_uid
     #- robozonky_java_home
     - robozonky_instance_name
     - robozonky_data_path
