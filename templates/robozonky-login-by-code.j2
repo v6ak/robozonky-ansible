@@ -1,0 +1,23 @@
+#!/bin/bash
+# safety settings
+set -u
+set -e
+set -o pipefail
+
+rm {{robozonky_data_path}}/login.cli
+umask 0077 # ensure secure file permissions
+cat > {{robozonky_data_path}}/login.cli <<EOF
+zonky-credentials
+-u
+"{{robozonky_zonky_email}}"
+-p
+"$(cat {{robozonky_data_path}}/zonky-auth-code)"
+-k
+"{{robozonky_data_path}}/robozonky.keystore"
+-s
+"{{robozonky_storage_password}}"
+EOF
+
+touch {{robozonky_data_path}}/must-log-in
+echo | {{robozonky_path}}/robozonky-cli @{{robozonky_data_path}}/login.cli 
+rm {{robozonky_data_path}}/must-log-in
